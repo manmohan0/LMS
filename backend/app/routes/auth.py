@@ -71,7 +71,7 @@ def register():
 def login():
     """Login and receive JWT tokens.
     ---
-    tags: [Auth]
+    tags: [Auth] 
     parameters:
       - in: body
         schema:
