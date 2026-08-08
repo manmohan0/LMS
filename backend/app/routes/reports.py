@@ -61,7 +61,7 @@ def student_report(student_id: int):
     responses:
       200: {description: Student performance report}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
 
     # Students can only view their own report
@@ -121,7 +121,7 @@ def course_report(course_id: int):
     responses:
       200: {description: Course report}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
 
@@ -191,7 +191,7 @@ def instructor_summary(instructor_id: int):
     responses:
       200: {description: Instructor summary}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     if user_id != instructor_id:
         user = User.query.get_or_404(user_id)
         if user.role != "admin":

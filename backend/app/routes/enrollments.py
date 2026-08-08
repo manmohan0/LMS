@@ -29,7 +29,7 @@ def enroll():
       201: {description: Enrolled}
       409: {description: Already enrolled}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     if user.role not in ("student", "admin"):
         return jsonify({"error": "Only students can enroll"}), 403
@@ -70,7 +70,7 @@ def my_enrollments():
     responses:
       200: {description: My enrollments}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     query = Enrollment.query.filter_by(student_id=user_id)
     result = paginate(query)
     return jsonify({
@@ -137,7 +137,7 @@ def complete_lesson(lesson_id: int):
       200: {description: Lesson marked complete}
       404: {description: Not enrolled}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     lesson = Lesson.query.get_or_404(lesson_id)
 
     enrollment = Enrollment.query.filter_by(
@@ -178,7 +178,7 @@ def get_course_progress(course_id: int):
     responses:
       200: {description: Course progress detail}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     enrollment = Enrollment.query.filter_by(student_id=user_id, course_id=course_id).first()
     if not enrollment:
         return jsonify({"error": "Not enrolled"}), 404

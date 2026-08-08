@@ -23,6 +23,7 @@ const GradingInterface = lazy(() => import('./pages/instructor/GradingInterface'
 const StudentDashboard = lazy(() => import('./pages/student/StudentDashboard').then(m => ({ default: m.StudentDashboard })))
 const BrowseCourses = lazy(() => import('./pages/student/BrowseCourses').then(m => ({ default: m.BrowseCourses })))
 const StudentQuizzes = lazy(() => import('./pages/student/StudentQuizzes').then(m => ({ default: m.StudentQuizzes })))
+const CourseDetail = lazy(() => import('./pages/student/CourseDetail').then(m => ({ default: m.CourseDetail })))
 
 // Shared pages (admin + instructor share many)
 const SharedCourseManagement = lazy(() => import('./pages/admin/CourseManagement').then(m => ({ default: m.CourseManagement })))
@@ -65,7 +66,9 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['student', 'admin']} />}>
             <Route path="/student" element={<StudentDashboard />} />
             <Route path="/student/courses" element={<BrowseCourses />} />
+            <Route path="/student/courses/:courseId" element={<CourseDetail />} />
             <Route path="/student/my-courses" element={<StudentDashboard />} />
+            <Route path="/student/my-courses/:courseId" element={<CourseDetail />} />
             <Route path="/student/assignments" element={<div style={{ padding: '2rem', color: 'var(--text-muted)' }}>My Assignments</div>} />
             <Route path="/student/quizzes" element={<StudentQuizzes />} />
           </Route>

@@ -32,7 +32,7 @@ def list_assignments():
     responses:
       200: {description: Assignment list}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     query = Assignment.query
 
@@ -83,7 +83,7 @@ def create_assignment():
     responses:
       201: {description: Created}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     data = request.get_json() or {}
 
@@ -126,7 +126,7 @@ def update_assignment(assignment_id: int):
     responses:
       200: {description: Updated}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     assignment = Assignment.query.get_or_404(assignment_id)
 
@@ -159,7 +159,7 @@ def delete_assignment(assignment_id: int):
     responses:
       200: {description: Deleted}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     assignment = Assignment.query.get_or_404(assignment_id)
 
@@ -184,7 +184,7 @@ def submit_assignment(assignment_id: int):
       201: {description: Submission created}
       409: {description: Already submitted}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     if user.role not in ("student", "admin"):
         return jsonify({"error": "Only students can submit assignments"}), 403
@@ -262,7 +262,7 @@ def grade_submission(submission_id: int):
     responses:
       200: {description: Graded}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     submission = Submission.query.get_or_404(submission_id)
     data = request.get_json() or {}
 
@@ -291,7 +291,7 @@ def my_submissions():
     responses:
       200: {description: My submissions}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     query = Submission.query.filter_by(student_id=user_id)
     result = paginate(query)
     return jsonify({

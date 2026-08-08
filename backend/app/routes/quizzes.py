@@ -23,7 +23,7 @@ def list_quizzes():
     responses:
       200: {description: Quiz list}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     query = Quiz.query
 
@@ -56,7 +56,7 @@ def get_quiz(quiz_id: int):
     responses:
       200: {description: Quiz detail}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     quiz = Quiz.query.get_or_404(quiz_id)
 
@@ -80,7 +80,7 @@ def create_quiz():
     responses:
       201: {description: Created}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     data = request.get_json() or {}
 
@@ -115,7 +115,7 @@ def update_quiz(quiz_id: int):
     responses:
       200: {description: Updated}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     quiz = Quiz.query.get_or_404(quiz_id)
 
@@ -142,7 +142,7 @@ def delete_quiz(quiz_id: int):
     responses:
       200: {description: Deleted}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     quiz = Quiz.query.get_or_404(quiz_id)
 
@@ -248,7 +248,7 @@ def start_or_submit_attempt(quiz_id: int):
     responses:
       201: {description: Attempt started or scored}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     if user.role not in ("student", "admin"):
         return jsonify({"error": "Only students can take quizzes"}), 403
@@ -301,7 +301,7 @@ def list_attempts(quiz_id: int):
     responses:
       200: {description: Attempt list}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     quiz = Quiz.query.get_or_404(quiz_id)
 

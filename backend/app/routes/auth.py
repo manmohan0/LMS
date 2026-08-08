@@ -129,7 +129,7 @@ def me():
     responses:
       200: {description: Current user info}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     return jsonify({"user": user.to_dict()})
 
@@ -144,7 +144,7 @@ def update_me():
     responses:
       200: {description: Updated user}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     data = request.get_json() or {}
 

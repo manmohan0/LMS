@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { useAtom } from 'jotai'
+import { currentUserAtom } from '../../atoms'
 import { coursesAPI, categoriesAPI, usersAPI } from '../../api'
 import { DataTable } from '../../components/DataTable'
 import { Modal, ConfirmModal } from '../../components/Modal'
 import { useToast } from '../../components/Toast'
-import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
 
 interface Course {
   id: number; title: string; level: string; instructor_name: string
@@ -17,6 +19,7 @@ interface CourseForm {
 const emptyForm: CourseForm = { title: '', description: '', level: 'beginner', duration: '', price: '0', is_published: false, category_id: '', instructor_id: '', thumbnail: '' }
 
 export const CourseManagement: React.FC = () => {
+  const [user] = useAtom(currentUserAtom)
   const [courses, setCourses] = useState<Course[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -39,12 +42,13 @@ export const CourseManagement: React.FC = () => {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await coursesAPI.listAll({ page, per_page: 10, search })
+      const fetcher = user?.role === 'instructor' ? coursesAPI.myCourses : coursesAPI.listAll
+      const res = await fetcher({ page, per_page: 10, search })
       setCourses(res.data.courses)
       setTotal(res.data.meta.total)
     } catch { toast.error('Failed to load courses') }
     finally { setLoading(false) }
-  }, [page, search])
+  }, [page, search, user])
 
   useEffect(() => { load() }, [load])
 

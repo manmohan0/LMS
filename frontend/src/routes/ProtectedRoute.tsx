@@ -48,7 +48,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
     return <Navigate to={redirectMap[user.role] || '/login'} replace />
   }
 
-  const title = pageTitles[location.pathname] || 'LearnHub'
+  const title = (location.pathname.includes('/courses/') || location.pathname.includes('/my-courses/')) && location.pathname.split('/').length > 3
+    ? 'Course Player & Details'
+    : pageTitles[location.pathname] || 'LearnHub'
 
   return (
     <div className="page-wrapper">

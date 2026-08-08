@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { coursesAPI, enrollmentsAPI, categoriesAPI } from '../../api'
 import { useToast } from '../../components/Toast'
 import { PageLoader } from '../../components/Spinner'
@@ -95,7 +96,9 @@ export const BrowseCourses: React.FC = () => {
                     {c.category_name && <span className="badge badge-primary">{c.category_name}</span>}
                     {c.price === 0 ? <span className="badge badge-success">Free</span> : <span className="badge badge-warning">${c.price}</span>}
                   </div>
-                  <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem', lineHeight: 1.4 }}>{c.title}</h3>
+                  <Link to={`/student/courses/${c.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '0.5rem', lineHeight: 1.4, cursor: 'pointer' }}>{c.title}</h3>
+                  </Link>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.5, marginBottom: '0.875rem' }}>
                     {c.description?.slice(0, 100)}{c.description?.length > 100 ? '…' : ''}
                   </p>
@@ -108,15 +111,20 @@ export const BrowseCourses: React.FC = () => {
                     <GraduationCap size={13} style={{ verticalAlign: 'middle', marginRight: 4 }} />
                     {c.instructor_name}
                   </p>
-                  <button
-                    className="btn-primary"
-                    style={{ width: '100%', justifyContent: 'center' }}
-                    disabled={enrolling === c.id}
-                    onClick={() => handleEnroll(c.id)}
-                  >
-                    {enrolling === c.id ? <div className="spinner" style={{ width: 16, height: 16 }} /> : <GraduationCap size={16} />}
-                    {enrolling === c.id ? 'Enrolling…' : 'Enroll Now'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Link to={`/student/courses/${c.id}`} className="btn-secondary" style={{ flex: 1, justifyContent: 'center', fontSize: '0.82rem', textDecoration: 'none' }}>
+                      View Details
+                    </Link>
+                    <button
+                      className="btn-primary"
+                      style={{ flex: 1, justifyContent: 'center', fontSize: '0.82rem' }}
+                      disabled={enrolling === c.id}
+                      onClick={() => handleEnroll(c.id)}
+                    >
+                      {enrolling === c.id ? <div className="spinner" style={{ width: 14, height: 14 }} /> : <GraduationCap size={14} />}
+                      {enrolling === c.id ? 'Enrolling…' : 'Enroll Now'}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

@@ -84,7 +84,7 @@ def my_courses():
     responses:
       200: {description: My courses}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     if user.role not in ("instructor", "admin"):
         return jsonify({"error": "Only instructors can access this"}), 403
@@ -121,7 +121,7 @@ def create_course():
     responses:
       201: {description: Created}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     data = request.get_json() or {}
 
@@ -160,7 +160,7 @@ def update_course(course_id: int):
     responses:
       200: {description: Updated}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
 
@@ -187,7 +187,7 @@ def delete_course(course_id: int):
     responses:
       200: {description: Deleted}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
 
@@ -224,7 +224,7 @@ def create_lesson(course_id: int):
     responses:
       201: {description: Created}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
 
@@ -259,7 +259,7 @@ def update_lesson(course_id: int, lesson_id: int):
     responses:
       200: {description: Updated}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
     lesson = Lesson.query.get_or_404(lesson_id)
@@ -287,7 +287,7 @@ def delete_lesson(course_id: int, lesson_id: int):
     responses:
       200: {description: Deleted}
     """
-    user_id = get_jwt_identity()
+    user_id = int(get_jwt_identity())
     user = User.query.get_or_404(user_id)
     course = Course.query.get_or_404(course_id)
     lesson = Lesson.query.get_or_404(lesson_id)
