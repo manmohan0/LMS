@@ -25,7 +25,8 @@ interface Summary {
   quiz_pass_rate: number
 }
 
-const COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b']
+const BAR_COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#ec4899', '#f59e0b']
+const COLORS = BAR_COLORS
 
 export const AdminDashboard: React.FC = () => {
   const [user] = useAtom(currentUserAtom)
@@ -71,7 +72,7 @@ export const AdminDashboard: React.FC = () => {
   ]
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingTop: '0.25rem' }}>
       <div>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.25rem' }}>
           Welcome back, {user?.full_name} 👋
@@ -99,13 +100,17 @@ export const AdminDashboard: React.FC = () => {
         {/* Bar chart */}
         <div className="glass" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1.25rem' }}>Platform Overview</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(99,102,241,0.1)" />
-              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} />
-              <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} />
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={barData} margin={{ top: 10, right: 15, left: -5, bottom: 15 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(99,102,241,0.1)" vertical={false} />
+              <XAxis dataKey="name" tick={{ fill: '#94a3b8', fontSize: 11 }} interval={0} dy={4} axisLine={false} />
+              <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} allowDecimals={false} />
               <Tooltip contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10 }} />
-              <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                {barData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -113,26 +118,26 @@ export const AdminDashboard: React.FC = () => {
         {/* Pie charts */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div className="glass" style={{ padding: '1.25rem', flex: 1 }}>
-            <h4 style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Course Completion</h4>
-            <ResponsiveContainer width="100%" height={120}>
+            <h4 style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.5rem' }}>Course Completion</h4>
+            <ResponsiveContainer width="100%" height={150}>
               <PieChart>
-                <Pie data={enrollmentData} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value">
+                <Pie data={enrollmentData} cx="50%" cy="40%" innerRadius={28} outerRadius={46} dataKey="value">
                   {enrollmentData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                 </Pie>
                 <Tooltip contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10 }} />
-                <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 10 }} formatter={(v) => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="glass" style={{ padding: '1.25rem', flex: 1 }}>
-            <h4 style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.75rem' }}>Assignment Grading</h4>
-            <ResponsiveContainer width="100%" height={120}>
+            <h4 style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '0.5rem' }}>Assignment Grading</h4>
+            <ResponsiveContainer width="100%" height={150}>
               <PieChart>
-                <Pie data={submissionData} cx="50%" cy="50%" innerRadius={35} outerRadius={55} dataKey="value">
+                <Pie data={submissionData} cx="50%" cy="40%" innerRadius={28} outerRadius={46} dataKey="value">
                   {submissionData.map((_, i) => <Cell key={i} fill={[COLORS[2], COLORS[3]][i]} />)}
                 </Pie>
                 <Tooltip contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10 }} />
-                <Legend iconType="circle" iconSize={8} formatter={(v) => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ paddingTop: 10 }} formatter={(v) => <span style={{ color: '#94a3b8', fontSize: 12 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </div>

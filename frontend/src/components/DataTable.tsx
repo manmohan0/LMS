@@ -22,12 +22,13 @@ interface DataTableProps<T> {
   actions?: (row: T) => React.ReactNode
   title?: string
   headerRight?: React.ReactNode
+  emptyMessage?: string
 }
 
 export function DataTable<T extends { id: number }>({
   data, columns, loading, searchable, searchPlaceholder = 'Search…',
   onSearch, total = 0, page = 1, perPage = 10, onPageChange,
-  actions, title, headerRight,
+  actions, title, headerRight, emptyMessage = 'No records found',
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('')
   const totalPages = Math.ceil(total / perPage)
@@ -80,7 +81,7 @@ export function DataTable<T extends { id: number }>({
             ) : data.length === 0 ? (
               <tr>
                 <td colSpan={columns.length + (actions ? 1 : 0)} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                  No records found
+                  {emptyMessage}
                 </td>
               </tr>
             ) : (

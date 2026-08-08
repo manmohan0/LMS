@@ -12,9 +12,18 @@ export interface AuthUser {
   avatar?: string
 }
 
-export const accessTokenAtom = atomWithStorage<string | null>('lms_access_token', null)
-export const refreshTokenAtom = atomWithStorage<string | null>('lms_refresh_token', null)
-export const currentUserAtom = atomWithStorage<AuthUser | null>('lms_user', null)
+const getInitialValue = <T>(key: string, fallback: T): T => {
+  try {
+    const item = localStorage.getItem(key)
+    return item ? JSON.parse(item) : fallback
+  } catch {
+    return fallback
+  }
+}
+
+export const accessTokenAtom = atomWithStorage<string | null>('lms_access_token', getInitialValue('lms_access_token', null))
+export const refreshTokenAtom = atomWithStorage<string | null>('lms_refresh_token', getInitialValue('lms_refresh_token', null))
+export const currentUserAtom = atomWithStorage<AuthUser | null>('lms_user', getInitialValue('lms_user', null))
 export const isAuthenticatedAtom = atom((get) => !!get(accessTokenAtom) && !!get(currentUserAtom))
 
 // ── UI atoms ──────────────────────────────────────────────────────────────────

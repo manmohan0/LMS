@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useAtom } from 'jotai'
 import { currentUserAtom } from '../../atoms'
-import { assignmentsAPI } from '../../api'
+import { assignmentsAPI, coursesAPI } from '../../api'
 import { DataTable } from '../../components/DataTable'
 import { Modal } from '../../components/Modal'
 import { useToast } from '../../components/Toast'
-import { Star } from 'lucide-react'
+import { Star, Plus, FileText, Calendar } from 'lucide-react'
 
 interface Submission {
   id: number; assignment_id: number; assignment_title: string; student_id: number; student_name: string
@@ -13,9 +13,26 @@ interface Submission {
   feedback: string; status: string
 }
 
+interface AssignmentForm {
+  course_id: string
+  title: string
+  description: string
+  due_date: string
+  max_score: string
+}
+
+const emptyAssignmentForm: AssignmentForm = {
+  course_id: '',
+  title: '',
+  description: '',
+  due_date: '',
+  max_score: '100',
+}
+
 export const GradingInterface: React.FC = () => {
   const [user] = useAtom(currentUserAtom)
   const [assignments, setAssignments] = useState<any[]>([])
+  const [courses, setCourses] = useState<any[]>([])
   const [selectedAssignment, setSelectedAssignment] = useState<any | null>(null)
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [total, setTotal] = useState(0)
@@ -27,9 +44,25 @@ export const GradingInterface: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const toast = useToast()
 
-  useEffect(() => {
-    assignmentsAPI.list().then((r) => setAssignments(r.data.assignments))
+  // Create Assignment state
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [assignmentForm, setAssignmentForm] = useState<AssignmentForm>(emptyAssignmentForm)
+  const [creatingAssignment, setCreatingAssignment] = useState(false)
+
+  const loadAssignments = useCallback(async () => {
+    try {
+      const res = await assignmentsAPI.list()
+      setAssignments(res.data.assignments || [])
+    } catch {
+      toast.error('Failed to load assignments')
+    }
   }, [])
+
+  useEffect(() => {
+    loadAssignments()
+    const fetcher = user?.role === 'instructor' ? coursesAPI.myCourses : coursesAPI.listAll
+    fetcher({ per_page: 100 }).then((r) => setCourses(r.data.courses || []))
+  }, [loadAssignments, user])
 
   const loadSubmissions = useCallback(async () => {
     if (!selectedAssignment) return
@@ -62,6 +95,40 @@ export const GradingInterface: React.FC = () => {
     finally { setSaving(false) }
   }
 
+  const handleCreateAssignment = async () => {
+    if (!assignmentForm.course_id) { toast.error('Please select a course'); return }
+    if (!assignmentForm.title.trim()) { toast.error('Assignment title required'); return }
+    setCreatingAssignment(true)
+    try {
+      const payload: any = {
+        course_id: parseInt(assignmentForm.course_id),
+        title: assignmentForm.title.trim(),
+        description: assignmentForm.description.trim() || undefined,
+        max_score: parseFloat(assignmentForm.max_score) || 100,
+      }
+      if (assignmentForm.due_date) {
+        const dueDateObj = new Date(assignmentForm.due_date)
+        if (dueDateObj <= new Date()) {
+          toast.error('Due date must be in the future ⏰')
+          return
+        }
+        payload.due_date = dueDateObj.toISOString()
+      }
+      const res = await assignmentsAPI.create(payload)
+      toast.success('Assignment created successfully! 📝')
+      setCreateModalOpen(false)
+      setAssignmentForm(emptyAssignmentForm)
+      await loadAssignments()
+      if (res.data.assignment) {
+        setSelectedAssignment(res.data.assignment)
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to create assignment')
+    } finally {
+      setCreatingAssignment(false)
+    }
+  }
+
   const statusBadge = (s: string) => <span className={`badge ${s === 'graded' ? 'badge-success' : s === 'returned' ? 'badge-warning' : 'badge-info'}`}>{s}</span>
 
   const columns = [
@@ -72,17 +139,25 @@ export const GradingInterface: React.FC = () => {
     { key: 'content', label: 'Preview', render: (s: Submission) => <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{(s.content || 'File submission').slice(0, 50)}…</span> },
   ]
 
+  const setForm = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
+    setAssignmentForm((prev) => ({ ...prev, [field]: e.target.value }))
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      <div>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Grading Center</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Review and grade student assignment submissions.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 700 }}>Assignments & Grading Center</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Create assignments and grade student submissions.</p>
+        </div>
+        <button className="btn-primary" onClick={() => setCreateModalOpen(true)}>
+          <Plus size={16} /> Create Assignment
+        </button>
       </div>
 
       {/* Assignment selector */}
       <div className="glass" style={{ padding: '1.25rem' }}>
         <label style={{ fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.5rem', display: 'block', color: 'var(--text-muted)' }}>Select Assignment</label>
-        <select className="input" style={{ maxWidth: 400 }} value={selectedAssignment?.id || ''} onChange={(e) => setSelectedAssignment(assignments.find((a) => a.id === parseInt(e.target.value)) || null)}>
+        <select className="input" style={{ maxWidth: 450 }} value={selectedAssignment?.id || ''} onChange={(e) => setSelectedAssignment(assignments.find((a) => a.id === parseInt(e.target.value)) || null)}>
           <option value="">— Choose an assignment —</option>
           {assignments.map((a) => <option key={a.id} value={a.id}>{a.course_title} — {a.title} ({a.submission_count} submissions)</option>)}
         </select>
@@ -101,9 +176,55 @@ export const GradingInterface: React.FC = () => {
         />
       ) : (
         <div className="empty-state">
-          <p>Select an assignment above to view submissions</p>
+          <p>Select an assignment above to view submissions, or click <strong>"+ Create Assignment"</strong> to add a new one.</p>
         </div>
       )}
+
+      {/* Create Assignment Modal */}
+      <Modal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} title="Create New Assignment" maxWidth={540}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="form-group">
+            <label>Course *</label>
+            <select className="input" value={assignmentForm.course_id} onChange={setForm('course_id')}>
+              <option value="">— Select Course —</option>
+              {courses.map((c) => (
+                <option key={c.id} value={c.id}>{c.title}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>Assignment Title *</label>
+            <input className="input" placeholder="e.g. Assignment 1: Python Data Structures" value={assignmentForm.title} onChange={setForm('title')} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label>Max Score (Points)</label>
+              <input className="input" type="number" min="1" placeholder="100" value={assignmentForm.max_score} onChange={setForm('max_score')} />
+            </div>
+            <div className="form-group">
+              <label>Due Date & Time</label>
+              <input
+                className="input"
+                type="datetime-local"
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                value={assignmentForm.due_date}
+                onChange={setForm('due_date')}
+              />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Instructions / Description</label>
+            <textarea className="input" rows={4} placeholder="Describe task requirements, submission format, guidelines…" value={assignmentForm.description} onChange={setForm('description')} style={{ resize: 'vertical' }} />
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+            <button className="btn-secondary" onClick={() => setCreateModalOpen(false)}>Cancel</button>
+            <button className="btn-primary" onClick={handleCreateAssignment} disabled={creatingAssignment}>
+              {creatingAssignment ? <div className="spinner" style={{ width: 16, height: 16 }} /> : <Plus size={15} />}
+              {creatingAssignment ? 'Creating…' : 'Create Assignment'}
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Grade modal */}
       <Modal isOpen={!!gradeModal} onClose={() => setGradeModal(null)} title="Grade Submission">
@@ -137,3 +258,4 @@ export const GradingInterface: React.FC = () => {
     </div>
   )
 }
+

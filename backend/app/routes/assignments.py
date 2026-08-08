@@ -100,6 +100,10 @@ def create_assignment():
     if data.get("due_date"):
         try:
             due_date = datetime.fromisoformat(data["due_date"])
+            if due_date.tzinfo is None:
+                due_date = due_date.replace(tzinfo=timezone.utc)
+            if due_date <= datetime.now(timezone.utc):
+                return jsonify({"error": "Due date must be in the future."}), 400
         except ValueError:
             return jsonify({"error": "Invalid due_date format. Use ISO 8601."}), 400
 

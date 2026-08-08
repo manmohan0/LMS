@@ -70,6 +70,9 @@ def student_report(student_id: int):
 
     student = User.query.get_or_404(student_id)
     enrollments = Enrollment.query.filter_by(student_id=student_id).all()
+    for e in enrollments:
+        e.calculate_progress()
+    db.session.commit()
     submissions = Submission.query.filter_by(student_id=student_id).all()
     attempts = QuizAttempt.query.filter_by(student_id=student_id).all()
 

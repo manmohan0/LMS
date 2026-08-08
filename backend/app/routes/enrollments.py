@@ -43,11 +43,13 @@ def enroll():
     if not course.is_published:
         return jsonify({"error": "Course is not available for enrollment"}), 400
 
-    existing = Enrollment.query.filter_by(student_id=user_id, course_id=course_id).first()
-    if existing:
-        return jsonify({"error": "Already enrolled in this course"}), 409
+    target_student_id = int(data.get("student_id")) if (user.role == "admin" and data.get("student_id")) else user_id
 
-    enrollment = Enrollment(student_id=user_id, course_id=course_id)
+    existing = Enrollment.query.filter_by(student_id=target_student_id, course_id=course_id).first()
+    if existing:
+        return jsonify({"error": "Student is already enrolled in this course"}), 409
+
+    enrollment = Enrollment(student_id=target_student_id, course_id=course_id)
     db.session.add(enrollment)
     db.session.flush()
 
@@ -183,6 +185,8 @@ def get_course_progress(course_id: int):
     if not enrollment:
         return jsonify({"error": "Not enrolled"}), 404
 
+    enrollment.calculate_progress()
+    db.session.commit()
     lesson_progress = [lp.to_dict() for lp in enrollment.lesson_progress]
     return jsonify({
         "enrollment": enrollment.to_dict(),

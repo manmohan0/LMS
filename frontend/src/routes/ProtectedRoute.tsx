@@ -68,6 +68,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
 export const PublicRoute: React.FC = () => {
   const [isAuth] = useAtom(isAuthenticatedAtom)
   const [user] = useAtom(currentUserAtom)
+  const location = useLocation()
 
   if (isAuth && user) {
     const redirectMap: Record<string, string> = {
@@ -75,7 +76,8 @@ export const PublicRoute: React.FC = () => {
       instructor: '/instructor',
       student: '/student',
     }
-    return <Navigate to={redirectMap[user.role]} replace />
+    const from = (location.state as any)?.from?.pathname || redirectMap[user.role] || '/login'
+    return <Navigate to={from} replace />
   }
 
   return <Outlet />

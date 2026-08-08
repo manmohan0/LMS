@@ -94,7 +94,7 @@ export const coursesAPI = {
 }
 
 export const enrollmentsAPI = {
-  enroll: (courseId: number) => api.post('/enrollments/', { course_id: courseId }),
+  enroll: (courseId: number, studentId?: number) => api.post('/enrollments/', { course_id: courseId, student_id: studentId }),
   myEnrollments: (params?: object) => api.get('/enrollments/my', { params }),
   list: (params?: object) => api.get('/enrollments/', { params }),
   delete: (id: number) => api.delete(`/enrollments/${id}`),

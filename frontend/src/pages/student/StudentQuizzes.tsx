@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import { quizzesAPI } from '../../api'
 import { useToast } from '../../components/Toast'
 import { PageLoader } from '../../components/Spinner'
@@ -56,7 +56,25 @@ export const StudentQuizzes: React.FC = () => {
     finally { setSubmitting(false) }
   }
 
-  const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
+  const formatTime = (totalSec: number) => {
+    if (totalSec < 0) return '00:00'
+    const h = Math.floor(totalSec / 3600)
+    const m = Math.floor((totalSec % 3600) / 60)
+    const s = totalSec % 60
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    }
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  }
+
+  const formatMinutes = (mins?: number) => {
+    if (!mins || mins <= 0) return ''
+    const h = Math.floor(mins / 60)
+    const m = mins % 60
+    if (h > 0 && m > 0) return `${h}h ${m}m`
+    if (h > 0) return `${h}h`
+    return `${m}m`
+  }
 
   if (loading) return <PageLoader />
 
@@ -78,7 +96,7 @@ export const StudentQuizzes: React.FC = () => {
               <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
                 <span className="badge badge-primary">{q.question_count} questions</span>
                 <span className="badge badge-info">{q.total_points} pts</span>
-                {q.time_limit_minutes && <span className="badge badge-warning"><Clock size={11} /> {q.time_limit_minutes}m</span>}
+                {q.time_limit_minutes && <span className="badge badge-warning"><Clock size={11} /> {formatMinutes(q.time_limit_minutes)}</span>}
               </div>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Pass score: <strong style={{ color: 'var(--text)' }}>{q.pass_score}%</strong></p>
               <button className="btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={() => startQuiz(q)}>

@@ -17,7 +17,7 @@ export const StudentDashboard: React.FC = () => {
   useEffect(() => {
     if (!user) return
     Promise.all([
-      enrollmentsAPI.myEnrollments({ per_page: 6 }),
+      enrollmentsAPI.myEnrollments({ per_page: 4 }),
       reportsAPI.studentReport(user.id),
     ])
       .then(([e, r]) => {
@@ -70,7 +70,7 @@ export const StudentDashboard: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
-            {enrollments.map((e) => (
+            {enrollments.slice(0, 4).map((e) => (
               <Link key={e.id} to={`/student/my-courses/${e.course_id}`} style={{ textDecoration: 'none' }}>
                 <div className="glass" style={{ padding: '1.25rem', transition: 'transform 0.2s, box-shadow 0.2s' }}
                   onMouseEnter={(el) => (el.currentTarget.style.transform = 'translateY(-3px)')}
@@ -95,7 +95,7 @@ export const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Performance summary */}
-      {report && (report.avg_quiz_score > 0 || report.avg_assignment_score > 0) && (
+      {report && (
         <div className="glass" style={{ padding: '1.5rem' }}>
           <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Performance Summary</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
@@ -105,12 +105,16 @@ export const StudentDashboard: React.FC = () => {
             ].map((item) => (
               <div key={item.label} style={{ textAlign: 'center' }}>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>{item.label}</p>
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <p style={{ fontSize: '2rem', fontWeight: 800, color: item.color }}>{item.value.toFixed(1)}%</p>
-                </div>
-                <div className="progress-bar" style={{ maxWidth: 200, margin: '0.5rem auto 0' }}>
-                  <div className="progress-fill" style={{ width: `${item.value}%`, background: `linear-gradient(90deg, ${item.color}, ${item.color}88)` }} />
-                </div>
+                {item.value != null && item.value > 0 ? (
+                  <div style={{ position: 'relative', display: 'inline-block' }}>
+                    <p style={{ fontSize: '2rem', fontWeight: 800, color: item.color }}>{item.value.toFixed(1)}%</p>
+                    <div className="progress-bar" style={{ maxWidth: 200, margin: '0.5rem auto 0' }}>
+                      <div className="progress-fill" style={{ width: `${item.value}%`, background: `linear-gradient(90deg, ${item.color}, ${item.color}88)` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '1rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Not available</p>
+                )}
               </div>
             ))}
           </div>

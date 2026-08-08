@@ -41,6 +41,33 @@ interface Course {
   lessons: Lesson[]
 }
 
+const getEmbedUrl = (url?: string): string => {
+  if (!url) return ''
+  const trimmed = url.trim()
+  try {
+    if (trimmed.includes('youtube.com/watch')) {
+      const parsed = new URL(trimmed)
+      const videoId = parsed.searchParams.get('v')
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+    if (trimmed.includes('youtu.be/')) {
+      const videoId = trimmed.split('youtu.be/')[1]?.split('?')[0]?.split('/')[0]
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+    if (trimmed.includes('youtube.com/shorts/')) {
+      const videoId = trimmed.split('youtube.com/shorts/')[1]?.split('?')[0]?.split('/')[0]
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`
+    }
+    if (trimmed.includes('vimeo.com/') && !trimmed.includes('player.vimeo.com')) {
+      const videoId = trimmed.split('vimeo.com/')[1]?.split('?')[0]?.split('/')[0]
+      if (videoId) return `https://player.vimeo.com/video/${videoId}`
+    }
+  } catch {
+    // Return trimmed as fallback
+  }
+  return trimmed
+}
+
 export const CourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
@@ -304,9 +331,10 @@ export const CourseDetail: React.FC = () => {
               {activeLesson.video_url && (
                 <div style={{ width: '100%', borderRadius: '12px', overflow: 'hidden', background: '#000', margin: '0.5rem 0' }}>
                   <iframe
-                    src={activeLesson.video_url}
+                    src={getEmbedUrl(activeLesson.video_url)}
                     title={activeLesson.title}
                     style={{ width: '100%', height: '360px', border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                   />
                 </div>
